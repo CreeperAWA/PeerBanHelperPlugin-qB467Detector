@@ -21,8 +21,6 @@ import java.util.concurrent.TimeUnit;
 @Component
 public class QB467Detector extends AbstractRuleFeatureModule {
     public QB467Detector() {
-        System.out.println("[QB467Detector] Constructor called. Thread: " + Thread.currentThread().getName());
-        new Exception("[QB467Detector] Stack trace for constructor").printStackTrace(System.out);
     }
     private static final String TARGET_CLIENT = "qBittorrent/4.6.7";
     private static final String TARGET_PEERID = "-qB4670-";
@@ -48,14 +46,10 @@ public class QB467Detector extends AbstractRuleFeatureModule {
 
     @Override
     public void onEnable() {
-        System.out.println("[QB467Detector] onEnable() called. Thread: " + Thread.currentThread().getName());
-        new Exception("[QB467Detector] Stack trace for onEnable").printStackTrace(System.out);
     }
 
     @Override
     public void onDisable() {
-        System.out.println("[QB467Detector] onDisable() called. Thread: " + Thread.currentThread().getName());
-        new Exception("[QB467Detector] Stack trace for onDisable").printStackTrace(System.out);
     }
 
     @Override
@@ -80,9 +74,7 @@ public class QB467Detector extends AbstractRuleFeatureModule {
             try (Response response = HTTP_CLIENT.newCall(request).execute()) {
                 String body = response.body() != null ? response.body().string() : "";
                 int code = response.code();
-                System.out.println("[QB467Detector] Detected: ip=" + ip + ", url=" + url + ", responseCode=" + code + ", responseBody=" + body);
                 if (code == 404 || body.contains("File not found")) {
-                    System.out.println("[QB467Detector] Peer matched and will be banned: " + ip + " (reason: code==404 or body contains 'File not found')");
                     return new CheckResult(
                             getClass(),
                             PeerAction.BAN,
@@ -92,12 +84,8 @@ public class QB467Detector extends AbstractRuleFeatureModule {
                             StructuredData.create().add("ip", ip).add("reason", "qB467 特征检测'")
                     );
                 }
-            } catch (IOException e) {
-                System.out.println("[QB467Detector] Detected: ip=" + ip + ", url=" + url + ", HTTP request failed: " + e.getMessage());
-                e.printStackTrace(System.out);
-            } catch (Throwable t) {
-                System.out.println("[QB467Detector] Detected: ip=" + ip + ", url=" + url + ", Unexpected error: " + t.getMessage());
-                t.printStackTrace(System.out);
+            } catch (IOException | RuntimeException ignored) {
+                // 网络异常时不封禁
             }
         }
         return pass();
