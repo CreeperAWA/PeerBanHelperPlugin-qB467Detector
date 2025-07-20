@@ -22,6 +22,7 @@ import java.util.concurrent.TimeUnit;
 public class qB467Detector extends AbstractRuleFeatureModule {
     public qB467Detector() {
         System.out.println("[qB467Detector] Bean constructed. Thread: " + Thread.currentThread().getName());
+        System.out.println("[qB467Detector] If you see this, Spring has instantiated the detector bean.");
     }
     private static final String TARGET_CLIENT = "qBittorrent/4.6.7";
     private static final String TARGET_PEERID = "-qB4670-";
@@ -48,6 +49,7 @@ public class qB467Detector extends AbstractRuleFeatureModule {
     @Override
     public void onEnable() {
         System.out.println("[qB467Detector] onEnable() called. Thread: " + Thread.currentThread().getName());
+        System.out.println("[qB467Detector] If you see this, the module is enabled and registered.");
     }
 
     @Override

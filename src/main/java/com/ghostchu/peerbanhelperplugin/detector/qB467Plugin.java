@@ -30,12 +30,16 @@ public class qB467Plugin extends Plugin {
             @com.google.common.eventbus.Subscribe
             public void onPBHStarted(PBHServerStartedEvent event) {
                 try {
+                    System.out.println("[qB467Plugin] PBHServerStartedEvent received, try to register qB467Detector...");
                     ApplicationContext ctx = Main.getApplicationContext();
                     Object moduleManager = ctx.getBean("moduleManagerImpl");
                     Object detector = ctx.getBean("qB467Detector");
+                    System.out.println("[qB467Plugin] moduleManagerImpl=" + moduleManager + ", detector=" + detector);
                     moduleManager.getClass().getMethod("register", detector.getClass().getSuperclass(), String.class)
                         .invoke(moduleManager, detector, "qB467Detector");
+                    System.out.println("[qB467Plugin] qB467Detector registered to ModuleManager.");
                 } catch (Throwable t) {
+                    System.out.println("[qB467Plugin] Register qB467Detector failed: " + t.getMessage());
                     t.printStackTrace(System.out);
                 }
             }
