@@ -23,7 +23,7 @@ jobs:
         run: mvn -B package --file pom.xml
 
       - name: Upload plugin jar
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: qb467-detector-plugin
           path: target/*.jar
