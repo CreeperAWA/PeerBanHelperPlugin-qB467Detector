@@ -132,7 +132,7 @@ public class qB467Detector extends AbstractRuleFeatureModule {
                             PeerAction.BAN, // 触发封禁动作
                             0, // 永久封禁
                             new TranslationComponent("qB467 吸血特征检测插件"), // 模块名称
-                            new TranslationComponent(Lang.MODULE_BTN_BAN, "qB467"), // 封禁标签
+                            new TranslationComponent("qB467 吸血特征检测插件"), // 封禁标签
                             StructuredData.create().add("ip", ip).add("reason", "qB467 吸血特征检测插件'")
                     );
                 }
