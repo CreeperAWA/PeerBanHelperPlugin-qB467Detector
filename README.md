@@ -1,19 +1,18 @@
-# PeerBanHelper qB467Detector 插件
+# PeerBanHelper qB467PeerDetectorPlugin
 
 > [!TIP]
-> 本项目完全使用 GitHub Copilot 的 Agent 编写（所有文件，包括你现在看到的 README.md）
+> 本项目代码使用 GitHub Copilot 的 Agent 编写
 
 ## 简介
 本插件用于 PeerBanHelper，自动检测并封禁客户端为 `qBittorrent/4.6.7` 或 PeerID 为 `-qB4670-` 的 Peer。
 
+## 原理
+经过观察，这些恶意的 Peer 均有一个使用 `Python/3.10 aiohttp/3.11.12` 编写的 HTTP 服务器监听在 8089 端口（疑似用于集控），如果直接访问响应体为`File not found` 且状态码为 404，该插件利用了这一特征，实现了使用 qBittorrent/4.6.7 吸血的 Peer 的精准检测
+
 ## 使用方法
 1. 从 Releases 下载 JAR 文件
 2. 将 JAR 文件放入 PeerBanHelper 的 `data/plugins` 目录。
-3. 重启 PeerBanHelper，插件会自动加载。
-
-## 开发说明
-- 插件基于 PF4J 插件系统，入口类为 `com.ghostchu.peerbanhelperplugin.detector.QB467Plugin`。
-- 检测逻辑见 `QB467Detector.java`。
+3. 重启 PeerBanHelper，插件会自动加载。如果日志中出现 `[Bootstrap/INFO]: [注册] qB467PeerDetector`，说明插件已经开始运行。
 
 ## 依赖
 - PF4J

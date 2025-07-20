@@ -2,6 +2,12 @@ name: Build PeerBanHelper qB467Detector Plugin
 
 on:
   workflow_dispatch:
+  release:
+    types:
+      - published
+
+permissions:
+  contents: write
 
 jobs:
   build:
@@ -19,8 +25,25 @@ jobs:
       - name: Build with Maven
         run: mvn -B package --file pom.xml
 
-      - name: Upload plugin jar
+      - name: Upload plugin zip as artifact
         uses: actions/upload-artifact@v4
         with:
           name: qb467-detector-plugin
-          path: target/*.jar
+          path: target/qb467-detector-plugin.zip
+
+      - name: Set ZIP file path and name
+        id: zipfile
+        run: |
+          echo "zip_file=target/qb467-detector-plugin.zip" >> $GITHUB_ENV
+          echo "zip_name=qb467-detector-plugin.zip" >> $GITHUB_ENV
+
+      - name: Upload to GitHub Release
+        if: ${{ github.event_name == 'release' }}
+        uses: github/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: ${{ env.zip_file }}
+          asset_name: ${{ env.zip_name }}
+          asset_content_type: application/zip

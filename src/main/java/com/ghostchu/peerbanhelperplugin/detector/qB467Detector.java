@@ -43,11 +43,11 @@ public class qB467Detector extends AbstractRuleFeatureModule {
 
     /**
      * 获取模块名称
-     * @return 模块名称 "qB467 Peer Detector"
+     * @return 模块名称 "qB467PeerDetector"
      */
     @Override
     public @NotNull String getName() {
-        return "qB467 Peer Detector";
+        return "qB467PeerDetector";
     }
 
     /**
@@ -130,10 +130,10 @@ public class qB467Detector extends AbstractRuleFeatureModule {
                     return new CheckResult(
                             getClass(),
                             PeerAction.BAN, // 触发封禁动作
-                            0, // 永久封禁
-                            new TranslationComponent("qB467 吸血特征检测插件"), // 模块名称
-                            new TranslationComponent("qB467 吸血特征检测插件"), // 封禁标签
-                            StructuredData.create().add("ip", ip).add("reason", "qB467 吸血特征检测插件'")
+                            0,
+                            new TranslationComponent("[插件] qB467PeerDetectorPlugin"), // 模块名称
+                            new TranslationComponent("[插件] qB467PeerDetectorPlugin"), // 封禁标签
+                            StructuredData.create().add("ip", ip).add("reason", "[插件] qB467PeerDetectorPlugin'")
                     );
                 }
             } catch (IOException | RuntimeException e) {
