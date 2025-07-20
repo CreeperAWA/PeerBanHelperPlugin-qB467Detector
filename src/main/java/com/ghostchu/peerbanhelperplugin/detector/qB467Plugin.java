@@ -33,31 +33,11 @@ public class qB467Plugin extends Plugin {
                     System.out.println("[qB467Plugin] PBHServerStartedEvent received, try to register qB467Detector...");
                     ApplicationContext ctx = Main.getApplicationContext();
                     Object moduleManager = ctx.getBean("moduleManagerImpl");
-                    Object detector = null;
-                    try {
-                        detector = ctx.getBean("qB467Detector");
-                        System.out.println("[qB467Plugin] Got qB467Detector from main Spring context: " + detector);
-                    } catch (Exception e) {
-                        System.out.println("[qB467Plugin] Main Spring context getBean('qB467Detector') failed: " + e.getMessage());
-                        // 尝试插件内自建Spring上下文
-                        try {
-                            org.springframework.context.annotation.AnnotationConfigApplicationContext pluginCtx = new org.springframework.context.annotation.AnnotationConfigApplicationContext();
-                            pluginCtx.scan("com.ghostchu.peerbanhelperplugin.detector");
-                            pluginCtx.refresh();
-                            detector = pluginCtx.getBean("qB467Detector");
-                            System.out.println("[qB467Plugin] Got qB467Detector from plugin Spring context: " + detector);
-                        } catch (Exception ex) {
-                            System.out.println("[qB467Plugin] Plugin Spring context getBean('qB467Detector') failed: " + ex.getMessage());
-                        }
-                    }
-                    System.out.println("[qB467Plugin] moduleManagerImpl=" + moduleManager + ", detector=" + detector);
-                    if (detector != null) {
-                        moduleManager.getClass().getMethod("register", detector.getClass().getSuperclass(), String.class)
-                            .invoke(moduleManager, detector, "qB467Detector");
-                        System.out.println("[qB467Plugin] qB467Detector registered to ModuleManager.");
-                    } else {
-                        System.out.println("[qB467Plugin] qB467Detector is null, registration skipped.");
-                    }
+                    Object detector = new qB467Detector();
+                    System.out.println("[qB467Plugin] Directly new qB467Detector: " + detector);
+                    moduleManager.getClass().getMethod("register", detector.getClass().getSuperclass(), String.class)
+                        .invoke(moduleManager, detector, "qB467Detector");
+                    System.out.println("[qB467Plugin] qB467Detector registered to ModuleManager.");
                 } catch (Throwable t) {
                     System.out.println("[qB467Plugin] Register qB467Detector failed: " + t.getMessage());
                     t.printStackTrace(System.out);

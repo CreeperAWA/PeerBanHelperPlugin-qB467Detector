@@ -13,16 +13,13 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 import org.jetbrains.annotations.NotNull;
-import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
-@Component("qB467Detector")
 public class qB467Detector extends AbstractRuleFeatureModule {
     public qB467Detector() {
-        System.out.println("[qB467Detector] Bean constructed. Thread: " + Thread.currentThread().getName());
-        System.out.println("[qB467Detector] If you see this, Spring has instantiated the detector bean.");
+        System.out.println("[qB467Detector] Instance constructed. Thread: " + Thread.currentThread().getName());
     }
     private static final String TARGET_CLIENT = "qBittorrent/4.6.7";
     private static final String TARGET_PEERID = "-qB4670-";
