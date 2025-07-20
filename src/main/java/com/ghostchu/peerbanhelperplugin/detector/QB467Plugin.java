@@ -10,6 +10,6 @@ public class QB467Plugin extends Plugin {
 
     @Override
     public void start() {
-        // 留空，自动注册由 @Component 完成
+        System.out.println("[QB467Plugin] start() called. If you see this, plugin entry is active.");
     }
 }

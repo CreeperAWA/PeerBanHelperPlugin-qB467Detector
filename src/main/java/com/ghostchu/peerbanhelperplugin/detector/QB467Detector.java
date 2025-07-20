@@ -44,12 +44,12 @@ public class QB467Detector extends AbstractRuleFeatureModule {
 
     @Override
     public void onEnable() {
-        // 无需特殊启用逻辑
+        System.out.println("[QB467Detector] onEnable() called. Module enabled.");
     }
 
     @Override
     public void onDisable() {
-        // 无需特殊禁用逻辑
+        System.out.println("[QB467Detector] onDisable() called. Module disabled.");
     }
 
     @Override
@@ -61,12 +61,17 @@ public class QB467Detector extends AbstractRuleFeatureModule {
     public @NotNull CheckResult shouldBanPeer(@NotNull Torrent torrent, @NotNull Peer peer, @NotNull Downloader downloader) {
         String clientName = peer.getClientName();
         String peerId = peer.getPeerId();
+        System.out.println("[QB467Detector] shouldBanPeer called: clientName=" + clientName + ", peerId=" + peerId);
         if ((TARGET_CLIENT.equals(clientName)) || (peerId != null && peerId.startsWith(TARGET_PEERID))) {
             String ip = peer.getPeerAddress().getIp();
             String url = "http://" + ip + ":8089/";
+            System.out.println("[QB467Detector] Detected target peer, sending HTTP request to: " + url);
             Request request = new Request.Builder().url(url).get().build();
             try (Response response = HTTP_CLIENT.newCall(request).execute()) {
-                if (response.code() == 404 || (response.body() != null && response.body().string().contains("File not found"))) {
+                String body = response.body() != null ? response.body().string() : "";
+                System.out.println("[QB467Detector] HTTP response: code=" + response.code() + ", body=" + body);
+                if (response.code() == 404 || body.contains("File not found")) {
+                    System.out.println("[QB467Detector] Peer matched and will be banned: " + ip);
                     return new CheckResult(
                             getClass(),
                             PeerAction.BAN,
@@ -77,6 +82,7 @@ public class QB467Detector extends AbstractRuleFeatureModule {
                     );
                 }
             } catch (IOException e) {
+                System.out.println("[QB467Detector] HTTP request failed: " + e.getMessage());
                 // 网络异常时不封禁
             }
         }
