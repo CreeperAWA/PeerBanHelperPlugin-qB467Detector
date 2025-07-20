@@ -20,7 +20,7 @@ import java.util.concurrent.TimeUnit;
 
 @Component("qB467Detector")
 public class qB467Detector extends AbstractRuleFeatureModule {
-    public QB467Detector() {
+    public qB467Detector() {
     }
     private static final String TARGET_CLIENT = "qBittorrent/4.6.7";
     private static final String TARGET_PEERID = "-qB4670-";
