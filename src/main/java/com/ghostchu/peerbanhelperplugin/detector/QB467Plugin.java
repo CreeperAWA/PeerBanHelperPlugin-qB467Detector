@@ -6,14 +6,26 @@ import com.ghostchu.peerbanhelper.event.PBHServerStartedEvent;
 import com.ghostchu.peerbanhelper.Main;
 import org.springframework.context.ApplicationContext;
 
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+
 public class QB467Plugin extends Plugin {
+    private ScheduledExecutorService scheduler;
+
     public QB467Plugin(PluginWrapper wrapper) {
         super(wrapper);
     }
 
     @Override
     public void start() {
-        // 注册 PBHServerStartedEvent 监听器，实现插件自动注册为功能模块
+        // 定时输出测试文本
+        scheduler = Executors.newSingleThreadScheduledExecutor();
+        scheduler.scheduleAtFixedRate(() -> {
+            System.out.println("[QB467Plugin] Plugin is running at " + System.currentTimeMillis());
+        }, 0, 10, TimeUnit.SECONDS);
+
+        // 保留原有自动注册功能模块逻辑
         Main.getEventBus().register(new Object() {
             @com.google.common.eventbus.Subscribe
             public void onPBHStarted(PBHServerStartedEvent event) {
@@ -21,11 +33,10 @@ public class QB467Plugin extends Plugin {
                     ApplicationContext ctx = Main.getApplicationContext();
                     Object moduleManager = ctx.getBean("moduleManagerImpl");
                     Object detector = ctx.getBean("QB467Detector");
-                    // 反射调用 register(FeatureModule, String)
                     moduleManager.getClass().getMethod("register", detector.getClass().getSuperclass(), String.class)
                         .invoke(moduleManager, detector, "QB467Detector");
                 } catch (Throwable t) {
-                    // 静默失败
+                    t.printStackTrace(System.out);
                 }
             }
         });
@@ -33,6 +44,8 @@ public class QB467Plugin extends Plugin {
 
     @Override
     public void stop() {
-        // 无需处理
+        if (scheduler != null) {
+            scheduler.shutdownNow();
+        }
     }
 }

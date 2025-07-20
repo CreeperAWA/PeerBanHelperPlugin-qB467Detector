@@ -1,10 +1,7 @@
 name: Build PeerBanHelper qB467Detector Plugin
 
 on:
-  push:
-    branches: [ main, master ]
-  pull_request:
-    branches: [ main, master ]
+  workflow_dispatch:
 
 jobs:
   build:
