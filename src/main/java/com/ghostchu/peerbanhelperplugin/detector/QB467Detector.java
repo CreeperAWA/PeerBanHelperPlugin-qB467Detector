@@ -79,9 +79,9 @@ public class QB467Detector extends AbstractRuleFeatureModule {
                             getClass(),
                             PeerAction.BAN,
                             0,
-                            new TranslationComponent("qB467 特征检测插件"),
+                            new TranslationComponent("qB467 吸血特征检测插件"),
                             new TranslationComponent(Lang.MODULE_BTN_BAN, "qB467"),
-                            StructuredData.create().add("ip", ip).add("reason", "qB467 特征检测'")
+                            StructuredData.create().add("ip", ip).add("reason", "qB467 吸血特征检测插件'")
                     );
                 }
             } catch (IOException | RuntimeException ignored) {
