@@ -44,16 +44,17 @@ public class qB467Plugin extends Plugin {
                     }
                     // 尝试用getDeclaredMethod注册
                     try {
+                        Class<?> featureModuleClass = Class.forName("com.ghostchu.peerbanhelper.module.FeatureModule");
                         java.lang.reflect.Method reg = moduleManager.getClass().getDeclaredMethod(
                             "register",
-                            detector.getClass().getSuperclass(),
+                            featureModuleClass,
                             String.class
                         );
                         reg.setAccessible(true);
-                        reg.invoke(moduleManager, detector, "qB467Detector");
-                        System.out.println("[qB467Plugin] qB467Detector registered to ModuleManager via getDeclaredMethod.");
+                        reg.invoke(moduleManager, featureModuleClass.cast(detector), "qB467Detector");
+                        System.out.println("[qB467Plugin] qB467Detector registered to ModuleManager via getDeclaredMethod(FeatureModule).");
                     } catch (Throwable t2) {
-                        System.out.println("[qB467Plugin] getDeclaredMethod register failed: " + t2.getMessage());
+                        System.out.println("[qB467Plugin] getDeclaredMethod(FeatureModule) register failed: " + t2.getMessage());
                         t2.printStackTrace(System.out);
                     }
                 } catch (Throwable t) {
