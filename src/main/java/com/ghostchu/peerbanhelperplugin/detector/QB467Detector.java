@@ -18,8 +18,8 @@ import org.springframework.stereotype.Component;
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
-@Component
-public class QB467Detector extends AbstractRuleFeatureModule {
+@Component("qB467Detector")
+public class qB467Detector extends AbstractRuleFeatureModule {
     public QB467Detector() {
     }
     private static final String TARGET_CLIENT = "qBittorrent/4.6.7";

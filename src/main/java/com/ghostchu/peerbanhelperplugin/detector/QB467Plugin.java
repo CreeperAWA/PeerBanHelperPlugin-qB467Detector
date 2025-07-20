@@ -10,10 +10,10 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
-public class QB467Plugin extends Plugin {
+public class qB467Plugin extends Plugin {
     private ScheduledExecutorService scheduler;
 
-    public QB467Plugin(PluginWrapper wrapper) {
+    public qB467Plugin(PluginWrapper wrapper) {
         super(wrapper);
     }
 
@@ -22,19 +22,19 @@ public class QB467Plugin extends Plugin {
         // 定时输出测试文本
         scheduler = Executors.newSingleThreadScheduledExecutor();
         scheduler.scheduleAtFixedRate(() -> {
-            System.out.println("[QB467Plugin] Plugin is running at " + System.currentTimeMillis());
+            System.out.println("[qB467Plugin] Plugin is running at " + System.currentTimeMillis());
         }, 0, 10, TimeUnit.SECONDS);
 
-        // 保留原有自动注册功能模块逻辑
+        // 自动注册功能模块
         Main.getEventBus().register(new Object() {
             @com.google.common.eventbus.Subscribe
             public void onPBHStarted(PBHServerStartedEvent event) {
                 try {
                     ApplicationContext ctx = Main.getApplicationContext();
                     Object moduleManager = ctx.getBean("moduleManagerImpl");
-                    Object detector = ctx.getBean("QB467Detector");
+                    Object detector = ctx.getBean("qB467Detector");
                     moduleManager.getClass().getMethod("register", detector.getClass().getSuperclass(), String.class)
-                        .invoke(moduleManager, detector, "QB467Detector");
+                        .invoke(moduleManager, detector, "qB467Detector");
                 } catch (Throwable t) {
                     t.printStackTrace(System.out);
                 }
