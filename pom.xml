@@ -40,6 +40,12 @@
             <artifactId>PeerBanHelper</artifactId>
             <version>master-SNAPSHOT</version>
             <scope>provided</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.ghostchu.peerbanhelper.external-libs</groupId>
+                    <artifactId>sqlite-jdbc-loongarch64</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
     </dependencies>
 
