@@ -35,9 +35,27 @@ public class qB467Plugin extends Plugin {
                     Object moduleManager = ctx.getBean("moduleManagerImpl");
                     Object detector = new qB467Detector();
                     System.out.println("[qB467Plugin] Directly new qB467Detector: " + detector);
-                    moduleManager.getClass().getMethod("register", detector.getClass().getSuperclass(), String.class)
-                        .invoke(moduleManager, detector, "qB467Detector");
-                    System.out.println("[qB467Plugin] qB467Detector registered to ModuleManager.");
+                    // 打印所有register方法签名
+                    System.out.println("[qB467Plugin] All register methods in moduleManagerImpl:");
+                    for (java.lang.reflect.Method m : moduleManager.getClass().getDeclaredMethods()) {
+                        if (m.getName().equals("register")) {
+                            System.out.println("  " + m);
+                        }
+                    }
+                    // 尝试用getDeclaredMethod注册
+                    try {
+                        java.lang.reflect.Method reg = moduleManager.getClass().getDeclaredMethod(
+                            "register",
+                            detector.getClass().getSuperclass(),
+                            String.class
+                        );
+                        reg.setAccessible(true);
+                        reg.invoke(moduleManager, detector, "qB467Detector");
+                        System.out.println("[qB467Plugin] qB467Detector registered to ModuleManager via getDeclaredMethod.");
+                    } catch (Throwable t2) {
+                        System.out.println("[qB467Plugin] getDeclaredMethod register failed: " + t2.getMessage());
+                        t2.printStackTrace(System.out);
+                    }
                 } catch (Throwable t) {
                     System.out.println("[qB467Plugin] Register qB467Detector failed: " + t.getMessage());
                     t.printStackTrace(System.out);
