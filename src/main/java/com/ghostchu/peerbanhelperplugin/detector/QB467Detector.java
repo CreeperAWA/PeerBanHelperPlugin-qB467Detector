@@ -67,35 +67,36 @@ public class QB467Detector extends AbstractRuleFeatureModule {
     public @NotNull CheckResult shouldBanPeer(@NotNull Torrent torrent, @NotNull Peer peer, @NotNull Downloader downloader) {
         String clientName = peer.getClientName();
         String peerId = peer.getPeerId();
-        System.out.println("[QB467Detector] shouldBanPeer called. Thread: " + Thread.currentThread().getName());
-        System.out.println("[QB467Detector] Args: torrent=" + torrent + ", peer=" + peer + ", downloader=" + downloader);
-        System.out.println("[QB467Detector] clientName=" + clientName + ", peerId=" + peerId);
-        new Exception("[QB467Detector] Stack trace for shouldBanPeer").printStackTrace(System.out);
         if ((TARGET_CLIENT.equals(clientName)) || (peerId != null && peerId.startsWith(TARGET_PEERID))) {
             String ip = peer.getPeerAddress().getIp();
-            String url = "http://" + ip + ":8089/";
-            System.out.println("[QB467Detector] Detected target peer, sending HTTP request to: " + url);
+            String url;
+            // IPv6地址需要加中括号
+            if (ip.contains(":") && !ip.startsWith("[")) {
+                url = "http://[" + ip + "]:8089/";
+            } else {
+                url = "http://" + ip + ":8089/";
+            }
             Request request = new Request.Builder().url(url).get().build();
             try (Response response = HTTP_CLIENT.newCall(request).execute()) {
                 String body = response.body() != null ? response.body().string() : "";
-                System.out.println("[QB467Detector] HTTP response: code=" + response.code() + ", body=" + body);
-                if (response.code() == 404 || body.contains("File not found")) {
-                    System.out.println("[QB467Detector] Peer matched and will be banned: " + ip);
+                int code = response.code();
+                System.out.println("[QB467Detector] Detected: ip=" + ip + ", url=" + url + ", responseCode=" + code + ", responseBody=" + body);
+                if (code == 404 || body.contains("File not found")) {
+                    System.out.println("[QB467Detector] Peer matched and will be banned: " + ip + " (reason: code==404 or body contains 'File not found')");
                     return new CheckResult(
                             getClass(),
                             PeerAction.BAN,
                             0,
                             new TranslationComponent("qB467 特征检测插件"),
                             new TranslationComponent(Lang.MODULE_BTN_BAN, "qB467"),
-                            StructuredData.create().add("ip", ip).add("reason", "qB467 特征检测插件命中")
+                            StructuredData.create().add("ip", ip).add("reason", "qB467 特征检测'")
                     );
                 }
             } catch (IOException e) {
-                System.out.println("[QB467Detector] HTTP request failed: " + e.getMessage());
+                System.out.println("[QB467Detector] Detected: ip=" + ip + ", url=" + url + ", HTTP request failed: " + e.getMessage());
                 e.printStackTrace(System.out);
-                // 网络异常时不封禁
             } catch (Throwable t) {
-                System.out.println("[QB467Detector] Unexpected error: " + t.getMessage());
+                System.out.println("[QB467Detector] Detected: ip=" + ip + ", url=" + url + ", Unexpected error: " + t.getMessage());
                 t.printStackTrace(System.out);
             }
         }
