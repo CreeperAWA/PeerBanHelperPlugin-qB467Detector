@@ -20,6 +20,10 @@ import java.util.concurrent.TimeUnit;
 
 @Component
 public class QB467Detector extends AbstractRuleFeatureModule {
+    public QB467Detector() {
+        System.out.println("[QB467Detector] Constructor called. Thread: " + Thread.currentThread().getName());
+        new Exception("[QB467Detector] Stack trace for constructor").printStackTrace(System.out);
+    }
     private static final String TARGET_CLIENT = "qBittorrent/4.6.7";
     private static final String TARGET_PEERID = "-qB4670-";
     private static final OkHttpClient HTTP_CLIENT = new OkHttpClient.Builder()
@@ -44,12 +48,14 @@ public class QB467Detector extends AbstractRuleFeatureModule {
 
     @Override
     public void onEnable() {
-        System.out.println("[QB467Detector] onEnable() called. Module enabled.");
+        System.out.println("[QB467Detector] onEnable() called. Thread: " + Thread.currentThread().getName());
+        new Exception("[QB467Detector] Stack trace for onEnable").printStackTrace(System.out);
     }
 
     @Override
     public void onDisable() {
-        System.out.println("[QB467Detector] onDisable() called. Module disabled.");
+        System.out.println("[QB467Detector] onDisable() called. Thread: " + Thread.currentThread().getName());
+        new Exception("[QB467Detector] Stack trace for onDisable").printStackTrace(System.out);
     }
 
     @Override
@@ -61,7 +67,10 @@ public class QB467Detector extends AbstractRuleFeatureModule {
     public @NotNull CheckResult shouldBanPeer(@NotNull Torrent torrent, @NotNull Peer peer, @NotNull Downloader downloader) {
         String clientName = peer.getClientName();
         String peerId = peer.getPeerId();
-        System.out.println("[QB467Detector] shouldBanPeer called: clientName=" + clientName + ", peerId=" + peerId);
+        System.out.println("[QB467Detector] shouldBanPeer called. Thread: " + Thread.currentThread().getName());
+        System.out.println("[QB467Detector] Args: torrent=" + torrent + ", peer=" + peer + ", downloader=" + downloader);
+        System.out.println("[QB467Detector] clientName=" + clientName + ", peerId=" + peerId);
+        new Exception("[QB467Detector] Stack trace for shouldBanPeer").printStackTrace(System.out);
         if ((TARGET_CLIENT.equals(clientName)) || (peerId != null && peerId.startsWith(TARGET_PEERID))) {
             String ip = peer.getPeerAddress().getIp();
             String url = "http://" + ip + ":8089/";
@@ -83,7 +92,11 @@ public class QB467Detector extends AbstractRuleFeatureModule {
                 }
             } catch (IOException e) {
                 System.out.println("[QB467Detector] HTTP request failed: " + e.getMessage());
+                e.printStackTrace(System.out);
                 // 网络异常时不封禁
+            } catch (Throwable t) {
+                System.out.println("[QB467Detector] Unexpected error: " + t.getMessage());
+                t.printStackTrace(System.out);
             }
         }
         return pass();
