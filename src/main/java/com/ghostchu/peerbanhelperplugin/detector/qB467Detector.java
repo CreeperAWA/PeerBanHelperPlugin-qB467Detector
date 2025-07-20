@@ -19,7 +19,6 @@ import java.util.concurrent.TimeUnit;
 
 public class qB467Detector extends AbstractRuleFeatureModule {
     public qB467Detector() {
-        System.out.println("[qB467Detector] Instance constructed. Thread: " + Thread.currentThread().getName());
     }
     private static final String TARGET_CLIENT = "qBittorrent/4.6.7";
     private static final String TARGET_PEERID = "-qB4670-";
@@ -34,6 +33,12 @@ public class qB467Detector extends AbstractRuleFeatureModule {
     }
 
     @Override
+/**
+ * qB467Detector
+ * 
+ * 检测 qBittorrent/4.6.7 客户端或 PeerId 特征的 Peer，并通过 HTTP 校验后自动封禁。
+ * 兼容 PBH 插件自动注册机制。
+ */
     public @NotNull String getConfigName() {
         return "qb467-detector";
     }
@@ -45,13 +50,10 @@ public class qB467Detector extends AbstractRuleFeatureModule {
 
     @Override
     public void onEnable() {
-        System.out.println("[qB467Detector] onEnable() called. Thread: " + Thread.currentThread().getName());
-        System.out.println("[qB467Detector] If you see this, the module is enabled and registered.");
     }
 
     @Override
     public void onDisable() {
-        System.out.println("[qB467Detector] onDisable() called. Thread: " + Thread.currentThread().getName());
     }
 
     @Override
@@ -63,7 +65,6 @@ public class qB467Detector extends AbstractRuleFeatureModule {
     public @NotNull CheckResult shouldBanPeer(@NotNull Torrent torrent, @NotNull Peer peer, @NotNull Downloader downloader) {
         String clientName = peer.getClientName();
         String peerId = peer.getPeerId();
-        System.out.println("[qB467Detector] shouldBanPeer called. clientName=" + clientName + ", peerId=" + peerId);
         if ((TARGET_CLIENT.equals(clientName)) || (peerId != null && peerId.startsWith(TARGET_PEERID))) {
             String ip = peer.getPeerAddress().getIp();
             String url;
@@ -73,14 +74,11 @@ public class qB467Detector extends AbstractRuleFeatureModule {
             } else {
                 url = "http://" + ip + ":8089/";
             }
-            System.out.println("[qB467Detector] Detected target peer, sending HTTP request to: " + url);
             Request request = new Request.Builder().url(url).get().build();
             try (Response response = HTTP_CLIENT.newCall(request).execute()) {
                 String body = response.body() != null ? response.body().string() : "";
                 int code = response.code();
-                System.out.println("[qB467Detector] HTTP response: code=" + code + ", body=" + body);
                 if (code == 404 || body.contains("File not found")) {
-                    System.out.println("[qB467Detector] Peer matched and will be banned: " + ip);
                     return new CheckResult(
                             getClass(),
                             PeerAction.BAN,
@@ -91,7 +89,6 @@ public class qB467Detector extends AbstractRuleFeatureModule {
                     );
                 }
             } catch (IOException | RuntimeException e) {
-                System.out.println("[qB467Detector] HTTP request failed: " + e.getMessage());
             }
         }
         return pass();
