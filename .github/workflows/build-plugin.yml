@@ -1,4 +1,6 @@
 
+permissions:
+  contents: write
 name: Build PeerBanHelper qB467Detector Plugin
 
 on:
