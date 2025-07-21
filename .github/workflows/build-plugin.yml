@@ -1,16 +1,14 @@
+
 name: Build PeerBanHelper qB467Detector Plugin
 
 on:
   workflow_dispatch:
   release:
-    types:
-      - published
-
-permissions:
-  contents: write
+    types: [published]
 
 jobs:
   build:
+    if: github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -25,25 +23,25 @@ jobs:
       - name: Build with Maven
         run: mvn -B package --file pom.xml
 
-      - name: Upload plugin zip as artifact
-        uses: actions/upload-artifact@v4
+  release-build:
+    if: github.event_name == 'release'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v3
         with:
-          name: qb467-detector-plugin
-          path: target/qb467-detector-plugin.zip
+          java-version: '21'
+          distribution: 'temurin'
 
-      - name: Set ZIP file path and name
-        id: zipfile
-        run: |
-          echo "zip_file=target/qb467-detector-plugin.zip" >> $GITHUB_ENV
-          echo "zip_name=qb467-detector-plugin.zip" >> $GITHUB_ENV
+      - name: Build with Maven
+        run: mvn -B package --file pom.xml
 
-      - name: Upload to GitHub Release
-        if: ${{ github.event_name == 'release' }}
-        uses: actions/upload-release-asset@v1
+      - name: Upload plugin jar to Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: target/*.jar
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ github.event.release.upload_url }}
-          asset_path: ${{ env.zip_file }}
-          asset_name: ${{ env.zip_name }}
-          asset_content_type: application/zip
