@@ -131,9 +131,9 @@ public class qB467Detector extends AbstractRuleFeatureModule {
                             getClass(),
                             PeerAction.BAN, // 触发封禁动作
                             0,
-                            new TranslationComponent("[插件] qB467PeerDetectorPlugin"), // 模块名称
-                            new TranslationComponent("[插件] qB467PeerDetectorPlugin"), // 封禁标签
-                            StructuredData.create().add("ip", ip).add("reason", "[插件] qB467PeerDetectorPlugin'")
+                            new TranslationComponent("[Plugin] qB467PeerDetector"), // 模块名称
+                            new TranslationComponent("[Plugin] qB467PeerDetector"), // 命中规则
+                            StructuredData.create().add("ip", ip).add("reason", "[Plugin] qB467PeerDetector'") // 封禁原因
                     );
                 }
             } catch (IOException | RuntimeException e) {
