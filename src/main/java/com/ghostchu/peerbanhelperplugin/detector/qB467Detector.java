@@ -29,7 +29,7 @@ public class qB467Detector extends AbstractRuleFeatureModule {
     public qB467Detector() {
     }
 
-    /** 目标客户端标识（User-Agent） */
+    /** 目标客户端标识（ClientName） */
     private static final String TARGET_CLIENT = "qBittorrent/4.6.7";
     
     /** 目标 PeerId 前缀特征 */
