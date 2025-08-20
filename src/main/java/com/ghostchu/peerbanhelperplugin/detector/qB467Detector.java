@@ -133,7 +133,7 @@ public class qB467Detector extends AbstractRuleFeatureModule {
                             0,
                             new TranslationComponent("[Plugin] qB467PeerDetector"), // 模块名称
                             new TranslationComponent("[Plugin] qB467PeerDetector"), // 命中规则
-                            StructuredData.create().add("ip", ip).add("reason", "[Plugin] qB467PeerDetector'") // 封禁原因
+                            StructuredData.create().add("ip", ip).add("reason", "[Plugin] qB467PeerDetector") // 封禁原因
                     );
                 }
             } catch (IOException | RuntimeException e) {
