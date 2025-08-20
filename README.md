@@ -7,7 +7,7 @@
 本插件用于 PeerBanHelper，自动检测并封禁客户端为 `qBittorrent/4.6.7` 或 PeerID 为 `-qB4670-` 的 Peer。
 
 ## 原理
-经过观察，这些恶意的 Peer 均有一个使用 `Python/3.10 aiohttp/3.11.12` 编写的 HTTP 服务器监听在 8089 端口（疑似用于集控），如果直接访问响应体为`File not found` 且状态码为 404，该插件利用了这一特征，实现了使用 qBittorrent/4.6.7 吸血的 Peer 的精准检测
+经过观察，这些恶意的 Peer 均有一个使用 `Python/3.10 aiohttp/3.11.12` 编写的 HTTP 服务器监听在 8089 端口（疑似用于集控），如果直接访问响应体为`File not found` 或状态码为 404，该插件利用了这一特征，实现了使用 qBittorrent/4.6.7 吸血的 Peer 的精准检测
 
 ## 使用方法
 1. 从 Releases 下载 JAR 文件
