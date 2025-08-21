@@ -9,12 +9,16 @@ import com.ghostchu.peerbanhelper.module.PeerAction;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.wrapper.StructuredData;
+import okhttp3.Call;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -25,6 +29,7 @@ import java.util.concurrent.TimeUnit;
  * 兼容 PBH 插件自动注册机制，无需额外配置即可生效。
  */
 public class qB467Detector extends AbstractRuleFeatureModule {
+    private static final Logger log = LoggerFactory.getLogger(qB467Detector.class);
     // 空构造方法
     public qB467Detector() {
     }
@@ -35,11 +40,8 @@ public class qB467Detector extends AbstractRuleFeatureModule {
     /** 目标 PeerId 前缀特征 */
     private static final String TARGET_PEERID = "-qB4670-";
     
-    /** HTTP 探针客户端（2秒超时） */
-    private static final OkHttpClient HTTP_CLIENT = new OkHttpClient.Builder()
-            .connectTimeout(2, TimeUnit.SECONDS)
-            .readTimeout(2, TimeUnit.SECONDS)
-            .build();
+    /** HTTP 探针客户端（1秒超时） */
+    private OkHttpClient httpClient;
 
     /**
      * 获取模块名称
@@ -74,6 +76,11 @@ public class qB467Detector extends AbstractRuleFeatureModule {
      */
     @Override
     public void onEnable() {
+        // 初始化HTTP客户端
+        this.httpClient = new OkHttpClient.Builder()
+                .connectTimeout(1, TimeUnit.SECONDS)
+                .readTimeout(1, TimeUnit.SECONDS)
+                .build();
     }
 
     /**
@@ -82,6 +89,11 @@ public class qB467Detector extends AbstractRuleFeatureModule {
      */
     @Override
     public void onDisable() {
+        // 清理HTTP客户端资源
+        if (this.httpClient != null) {
+            this.httpClient.dispatcher().executorService().shutdown();
+            this.httpClient.connectionPool().evictAll();
+        }
     }
 
     /**
@@ -109,6 +121,8 @@ public class qB467Detector extends AbstractRuleFeatureModule {
         
         // 特征匹配检测（客户端名称或 PeerId 符合目标特征）
         if ((TARGET_CLIENT.equals(clientName)) || (peerId != null && peerId.startsWith(TARGET_PEERID))) {
+            log.info("Detected qBittorrent/4.6.7 peer, initiating async probe: clientName={}, peerId={}, address={}", 
+                clientName, peerId, peer.getPeerAddress());
             String ip = peer.getPeerAddress().getIp();
             String url;
             
@@ -119,25 +133,58 @@ public class qB467Detector extends AbstractRuleFeatureModule {
                 url = "http://" + ip + ":8089/";
             }
             
-            // 构建 HTTP 探针请求
-            Request request = new Request.Builder().url(url).get().build();
-            try (Response response = HTTP_CLIENT.newCall(request).execute()) {
-                String body = response.body() != null ? response.body().string() : "";
-                int code = response.code();
-                
-                // 吸血特征验证：404 状态码或包含 "File not found" 内容
-                if (code == 404 || body.contains("File not found")) {
-                    return new CheckResult(
-                            getClass(),
-                            PeerAction.BAN, // 触发封禁动作
-                            0,
-                            new TranslationComponent("[Plugin] qB467PeerDetector"), // 模块名称
-                            new TranslationComponent("[Plugin] qB467PeerDetector"), // 命中规则
-                            StructuredData.create().add("ip", ip).add("reason", "[Plugin] qB467PeerDetector") // 封禁原因
-                    );
+            // 异步探测避免阻塞主线程
+            CompletableFuture<Boolean> probeFuture = CompletableFuture.supplyAsync(() -> {
+                // 构建 HTTP 探针请求
+                Request request = new Request.Builder().url(url).get().build();
+                Call call = httpClient.newCall(request);
+                try (Response response = call.execute()) {
+                    String body = response.body() != null ? response.body().string() : "";
+                    int code = response.code();
+                    String serverHeader = response.header("Server", "");
+                    
+                    log.debug("Probe response: address={}, code={}, serverHeader={}, bodyLength={}", 
+                        ip, code, serverHeader, body.length());
+                    
+                    // 吸血特征验证（满足任一条件即判定为恶意Peer）：
+                    // 条件一：状态码为 404
+                    // 条件二：响应体包含 "File not found"
+                    // 条件三：响应头包含 "Python/3.10 aiohttp/3.11.12"
+                    if (code == 404 || body.contains("File not found") || serverHeader.contains("Python/3.10 aiohttp/3.11.12")) {
+                        log.info("Malicious qBittorrent/4.6.7 peer detected and confirmed: address={}", ip);
+                        return true;
+                    } else {
+                        log.debug("qBittorrent/4.6.7 peer probe completed, but not matching malicious criteria: address={}", ip);
+                        return false;
+                    }
+                } catch (IOException e) {
+                    log.debug("qBittorrent/4.6.7 peer probe failed with IOException: address={}, error={}", ip, e.getMessage());
+                    return false;
+                } catch (RuntimeException e) {
+                    log.debug("qBittorrent/4.6.7 peer probe failed with RuntimeException: address={}, error={}", ip, e.getMessage());
+                    return false;
                 }
-            } catch (IOException | RuntimeException e) {
-                // 探针失败（超时/连接拒绝等）时不封禁
+            });
+            
+            // 等待异步探测结果（非阻塞方式）
+            boolean isMalicious;
+            try {
+                // 等待最多2秒，防止长时间阻塞
+                isMalicious = probeFuture.get(2, TimeUnit.SECONDS);
+            } catch (Exception e) {
+                log.debug("qBittorrent/4.6.7 peer probe timeout or error: address={}, error={}", ip, e.getMessage());
+                isMalicious = false;
+            }
+            
+            if (isMalicious) {
+                return new CheckResult(
+                        getClass(),
+                        PeerAction.BAN, // 触发封禁动作
+                        0,
+                        new TranslationComponent("[Plugin] qB467PeerDetector"), // 模块名称
+                        new TranslationComponent("[Plugin] qB467PeerDetector"), // 命中规则
+                        StructuredData.create().add("ip", ip).add("reason", "[Plugin] qB467PeerDetector") // 封禁原因
+                );
             }
         }
         return pass(); // 未匹配特征时放行
