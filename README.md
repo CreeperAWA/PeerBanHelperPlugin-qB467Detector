@@ -12,7 +12,7 @@
 - 响应体内容: `File not found`
 - HTTP 状态码: `404`
 
-本插件利用上述特征，实现对“吸血”行为的 qBittorrent 4.6.7 客户端的精准识别与封禁。
+本插件利用上述特征，实现对"吸血"行为的 qBittorrent 4.6.7 客户端的精准识别与封禁。
 
 ## 检测逻辑
 
@@ -85,6 +85,11 @@ flowchart TD
 - OkHttp（HTTP 请求客户端）
 - SLF4J（日志门面）
 - PeerBanHelper 主程序（运行环境依赖）
+
+## 构建要求
+
+- JDK 21 或更高版本
+- Maven 3.10.1 或更高版本
 
 ## CI/CD 构建
 
