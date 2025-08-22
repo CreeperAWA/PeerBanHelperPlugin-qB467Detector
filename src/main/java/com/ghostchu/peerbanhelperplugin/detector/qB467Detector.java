@@ -46,7 +46,7 @@ public class qB467Detector extends AbstractRuleFeatureModule {
     /** HTTP 探针客户端（1秒超时） */
     private OkHttpClient httpClient;
 
-    /** IP检测缓存，避免24小时内重复检测同一IP */
+    /** IP检测缓存，避免24小时内重复检测同一安全IP */
     private final ConcurrentHashMap<String, Instant> detectionCache = new ConcurrentHashMap<>();
     
     /** 缓存有效期（24小时） */
@@ -135,12 +135,9 @@ public class qB467Detector extends AbstractRuleFeatureModule {
             // 检查缓存中是否已有该IP且在24小时内检测过
             Instant lastDetection = detectionCache.get(ip);
             if (lastDetection != null && Duration.between(lastDetection, Instant.now()).toHours() < 24) {
-                log.debug("Skipping detection for IP {} as it was checked within the last 24 hours", ip);
-                return pass(); // 24小时内已检测过，跳过检测
+                log.debug("Skipping detection for IP {} as it was checked within the last 24 hours and found to be safe", ip);
+                return pass(); // 24小时内已检测过且安全，跳过检测
             }
-            
-            // 更新缓存中的检测时间
-            detectionCache.put(ip, Instant.now());
             
             log.info("Detected qBittorrent/4.6.7 peer, initiating async probe: clientName={}, peerId={}, address={}", 
                 clientName, peerId, peer.getPeerAddress());
@@ -197,6 +194,7 @@ public class qB467Detector extends AbstractRuleFeatureModule {
             }
             
             if (isMalicious) {
+                // 触发封禁的IP不缓存，这样可以重复检测和封禁
                 return new CheckResult(
                         getClass(),
                         PeerAction.BAN, // 触发封禁动作
@@ -205,6 +203,9 @@ public class qB467Detector extends AbstractRuleFeatureModule {
                         new TranslationComponent("[Plugin] qB467PeerDetector"), // 命中规则
                         StructuredData.create().add("ip", ip).add("reason", "[Plugin] qB467PeerDetector") // 封禁原因
                 );
+            } else {
+                // 只有检测过且安全的IP才会被缓存24小时
+                detectionCache.put(ip, Instant.now());
             }
         }
         return pass(); // 未匹配特征时放行
