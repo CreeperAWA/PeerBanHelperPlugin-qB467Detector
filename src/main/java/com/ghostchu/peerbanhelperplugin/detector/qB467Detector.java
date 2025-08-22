@@ -18,7 +18,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -42,6 +45,12 @@ public class qB467Detector extends AbstractRuleFeatureModule {
     
     /** HTTP 探针客户端（1秒超时） */
     private OkHttpClient httpClient;
+
+    /** IP检测缓存，避免24小时内重复检测同一IP */
+    private final ConcurrentHashMap<String, Instant> detectionCache = new ConcurrentHashMap<>();
+    
+    /** 缓存有效期（24小时） */
+    private static final Duration CACHE_DURATION = Duration.ofHours(24);
 
     /**
      * 获取模块名称
@@ -121,9 +130,20 @@ public class qB467Detector extends AbstractRuleFeatureModule {
         
         // 特征匹配检测（客户端名称或 PeerId 符合目标特征）
         if ((TARGET_CLIENT.equals(clientName)) || (peerId != null && peerId.startsWith(TARGET_PEERID))) {
+            String ip = peer.getPeerAddress().getIp();
+            
+            // 检查缓存中是否已有该IP且在24小时内检测过
+            Instant lastDetection = detectionCache.get(ip);
+            if (lastDetection != null && Duration.between(lastDetection, Instant.now()).toHours() < 24) {
+                log.debug("Skipping detection for IP {} as it was checked within the last 24 hours", ip);
+                return pass(); // 24小时内已检测过，跳过检测
+            }
+            
+            // 更新缓存中的检测时间
+            detectionCache.put(ip, Instant.now());
+            
             log.info("Detected qBittorrent/4.6.7 peer, initiating async probe: clientName={}, peerId={}, address={}", 
                 clientName, peerId, peer.getPeerAddress());
-            String ip = peer.getPeerAddress().getIp();
             String url;
             
             // 处理 IPv6 地址格式（添加方括号包裹）
