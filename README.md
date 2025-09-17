@@ -1,6 +1,9 @@
 # qB467PeerDetectorPlugin
 
-> [!TIP]  
+> [!WARNING]
+> **该插件目前在 [v9.0.0-beta2](https://github.com/PBH-BTN/PeerBanHelper/releases/tag/v9.0.0-beta2) 版本上不可用，会导致 PeerBanHelper 无法启动，请等待修复，修复版本将在 PeerBanHelper v9.0.0 正式版发布后发布。**
+
+> [!TIP]
 > 本项目代码由 GitHub Copilot Agent 辅助编写
 
 ## 简介
