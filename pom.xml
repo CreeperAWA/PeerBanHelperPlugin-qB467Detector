@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.ghostchu.peerbanhelperplugin</groupId>
     <artifactId>qb467-detector-plugin</artifactId>
-    <version>1.2.0</version>
+    <version>1.3.0</version>
     <packaging>jar</packaging>
     <name>PeerBanHelper qB467Detector Plugin</name>
     <description>Detect and ban qBittorrent/4.6.7 peers for PeerBanHelper</description>
