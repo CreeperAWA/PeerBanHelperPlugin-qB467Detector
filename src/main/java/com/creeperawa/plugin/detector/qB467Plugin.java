@@ -1,4 +1,4 @@
-package com.ghostchu.peerbanhelperplugin.detector;
+package com.creeperawa.plugin.detector;
 
 import org.pf4j.Plugin;
 import org.pf4j.PluginWrapper;

@@ -1,4 +1,4 @@
-package com.ghostchu.peerbanhelperplugin.detector;
+package com.creeperawa.plugin.detector;
 
 import com.ghostchu.peerbanhelper.bittorrent.peer.Peer;
 import com.ghostchu.peerbanhelper.bittorrent.torrent.Torrent;
