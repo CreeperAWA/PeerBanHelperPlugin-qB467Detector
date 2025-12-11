@@ -9,10 +9,10 @@
     <name>PeerBanHelper qB467Detector Plugin</name>
     <description>Detect and ban qBittorrent/4.6.7 peers for PeerBanHelper</description>
     <properties>
-        <maven.compiler.source>21</maven.compiler.source>
-        <maven.compiler.target>21</maven.compiler.target>
+        <maven.compiler.source>25</maven.compiler.source>
+        <maven.compiler.target>25</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.compiler.release>21</maven.compiler.release>
+        <maven.compiler.release>25</maven.compiler.release>
     </properties>
     <dependencies>
         <!-- PF4J -->
@@ -29,26 +29,23 @@
             <version>0.8.0</version>
             <scope>provided</scope>
         </dependency>
-        <!-- SLF4J API -->
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
-            <version>1.7.36</version>
-            <scope>provided</scope>
-        </dependency>
         <!-- OkHttp -->
         <dependency>
             <groupId>com.squareup.okhttp3</groupId>
             <artifactId>okhttp</artifactId>
             <version>4.11.0</version>
         </dependency>
-        <!-- PeerBanHelper 主程序依赖，使用 jitpack 远程仓库 -->
+        <!-- PeerBanHelper Main Program Dependency -->
         <dependency>
             <groupId>com.github.PBH-BTN</groupId>
             <artifactId>PeerBanHelper</artifactId>
             <version>master-SNAPSHOT</version>
             <scope>provided</scope>
             <exclusions>
+                <exclusion>
+                    <groupId>com.github.PBH-BTN.PeerBanHelper</groupId>
+                    <artifactId>sqlite-jdbc</artifactId>
+                </exclusion>
                 <exclusion>
                     <groupId>com.ghostchu.peerbanhelper.external-libs</groupId>
                     <artifactId>sqlite-jdbc-loongarch64</artifactId>
@@ -70,9 +67,9 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.10.1</version>
                 <configuration>
-                    <source>21</source>
-                    <target>21</target>
-                    <release>21</release>
+                    <source>25</source>
+                    <target>25</target>
+                    <release>25</release>
                 </configuration>
             </plugin>
             <plugin>
